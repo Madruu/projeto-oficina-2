@@ -5,10 +5,10 @@ Projeto acadêmico desenvolvido para gerenciar voluntários de um projeto social
 ---
 
 ## 👥 Integrantes do Grupo
-- Vitor de Tulio  
-- Victor Motta  
-- Mateus Chicoli  
-- Pedro Oliveira  
+- Mateus Chicoli Pedreira  
+- Pedro Henrique Lima Donini
+- Victor Motta de Oliveira  
+- Vitor Encinas Negrão de Tulio  
 
 ---
 
@@ -51,6 +51,10 @@ O sistema visa facilitar a gestão de voluntários e suas atividades dentro do p
 - **CI/CD:** GitHub Actions  
 - **Containerização:** Docker  
 
+---
+
+## 📅 Cronograma
+
 | Período                             | Atividade                                                                                                                                                                                                                                                                                                                 | Entregáveis                                                             |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | **15/09 – 22/09** (1ª semana)       | **Planejamento inicial**<br>- Definir tema e equipe<br>- Levantar requisitos funcionais<br>- Desenhar arquitetura em alto nível<br>- Definir estratégia de automação de testes (Jest + GitHub Actions)<br>- Definir tecnologias (React, Node, MongoDB, Docker)<br>- Criar repositório GitHub com README e pastas iniciais | Documento de requisitos + Diagrama de arquitetura + Repositório inicial |
@@ -62,7 +66,5 @@ O sistema visa facilitar a gestão de voluntários e suas atividades dentro do p
 | **17/11 – 21/11** (10ª semana)      | **Sprint Review 2**<br>- Gravar vídeo (até 3 min) mostrando funcionalidades e testes<br>- Submeter repositório atualizado                                                                                                                                                                                                 | Vídeo Sprint 2 + Repositório atualizado                                 |
 | **22/11 – 29/11** (11ª semana)      | Ajustes finais (bugs, novos requisitos, melhorias solicitadas pelo professor)                                                                                                                                                                                                                                             | Versão final do sistema + testes                                        |
 | **30/11 – 08/12** (12ª semana)      | **Entrega Final**<br>- Consolidar documentação<br>- Atualizar README e diagramas<br>                                                                                                                                                                                      | Projeto final no GitHub, documentação e testes completos                |
-
-
 ### Diagrama de Arquitetura
 ![diagrama_oficina2](https://github.com/user-attachments/assets/88e7d72d-0427-41b1-8dea-fe65bb9d3011)
