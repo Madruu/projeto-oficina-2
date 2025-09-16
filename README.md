@@ -66,5 +66,7 @@ O sistema visa facilitar a gestão de voluntários e suas atividades dentro do p
 | **17/11 – 21/11** (10ª semana)      | **Sprint Review 2**<br>- Gravar vídeo (até 3 min) mostrando funcionalidades e testes<br>- Submeter repositório atualizado                                                                                                                                                                                                 | Vídeo Sprint 2 + Repositório atualizado                                 |
 | **22/11 – 29/11** (11ª semana)      | Ajustes finais (bugs, novos requisitos, melhorias solicitadas pelo professor)                                                                                                                                                                                                                                             | Versão final do sistema + testes                                        |
 | **30/11 – 08/12** (12ª semana)      | **Entrega Final**<br>- Consolidar documentação<br>- Atualizar README e diagramas<br>                                                                                                                                                                                      | Projeto final no GitHub, documentação e testes completos                |
+---
+
 ### Diagrama de Arquitetura
 ![diagrama_oficina2](https://github.com/user-attachments/assets/88e7d72d-0427-41b1-8dea-fe65bb9d3011)
