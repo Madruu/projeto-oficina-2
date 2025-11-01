@@ -1,0 +1,23 @@
+# Dockerfile para produção
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiar arquivos de dependências
+COPY package*.json ./
+
+# Instalar apenas dependências de produção
+RUN npm ci --only=production
+
+# Copiar código da aplicação
+COPY . .
+
+# Expor porta do servidor
+EXPOSE 8000
+
+# Definir usuário não-root para segurança
+USER node
+
+# Comando para produção
+CMD ["npm", "start"]
+
