@@ -23,16 +23,16 @@ services:
   backend:
     build:
       context: ./server
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: oficina-2-backend
     restart: unless-stopped
     ports:
-      - "${PORT:-3000}:3000"
+      - "${PORT:-8000}:8000"
     env_file:
       - .env
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      PORT: 3000
+      PORT: 8000
       # Conecta ao MongoDB via nome do serviço Docker
       MONGO_URI: ${MONGO_URI:-mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DATABASE:-oficina2}?authSource=admin}
     depends_on:
@@ -45,6 +45,23 @@ services:
       - oficina-network
     # Usa nodemon para hot reload em desenvolvimento
     command: npm run dev
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    container_name: oficina-2-frontend
+    restart: unless-stopped
+    ports:
+      - "${CLIENT_PORT:-3000}:3000"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    networks:
+      - oficina-network
+    # Vite com hot reload em desenvolvimento
+    environment:
+      - NODE_ENV=development
 
 volumes:
   mongodb_data:
