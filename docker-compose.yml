@@ -1,4 +1,25 @@
 services:
+  mongodb:
+    image: mongo:7.0
+    container_name: oficina-2-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-oficina2}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - oficina-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   backend:
     build:
       context: ./server
@@ -12,11 +33,23 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3000
-      # Usa host.docker.internal para acessar MongoDB local no Windows/Mac
-      # No Linux, use: host.docker.internal ou o IP da máquina host
-      MONGO_URI: ${MONGO_URI:-mongodb://host.docker.internal:27017/oficina2}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      # Conecta ao MongoDB via nome do serviço Docker
+      MONGO_URI: ${MONGO_URI:-mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DATABASE:-oficina2}?authSource=admin}
+    depends_on:
+      mongodb:
+        condition: service_healthy
     volumes:
       - ./server:/app
       - /app/node_modules
+    networks:
+      - oficina-network
+    # Usa nodemon para hot reload em desenvolvimento
+    command: npm run dev
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  oficina-network:
+    driver: bridge
