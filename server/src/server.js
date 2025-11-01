@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import healthRoutes from "./routes/health.routes.js";
+import connectDB from "./config/db.js";
 
 // Carrega variáveis de ambiente
 dotenv.config();
@@ -17,9 +18,24 @@ app.use(express.urlencoded({ extended: true }));
 // Rotas
 app.use("/health", healthRoutes);
 
+// Função para iniciar o servidor
+const startServer = async () => {
+  try {
+    // Conecta ao MongoDB antes de iniciar o servidor
+    await connectDB();
+
+    // Inicia o servidor
+    app.listen(PORT, () => {
+      console.log(`🚀 Servidor rodando na porta ${PORT}`);
+      console.log(`🌍 Ambiente: ${process.env.NODE_ENV || "development"}`);
+    });
+  } catch (error) {
+    console.error("❌ Erro ao iniciar servidor:", error.message);
+    process.exit(1);
+  }
+};
+
 // Inicia o servidor
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
-});
+startServer();
 
 export default app;
