@@ -18,8 +18,8 @@
     "test:server": "npm run test --workspace=server",
     "test:client": "npm run test --workspace=client",
     "start": "npm run start --workspace=server",
-    "docker:up": "docker-compose up",
-    "docker:down": "docker-compose down"
+    "docker:up": "docker compose up",
+    "docker:down": "docker compose down"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

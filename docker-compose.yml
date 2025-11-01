@@ -1,0 +1,22 @@
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: oficina-2-backend
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      # Usa host.docker.internal para acessar MongoDB local no Windows/Mac
+      # No Linux, use: host.docker.internal ou o IP da máquina host
+      MONGO_URI: ${MONGO_URI:-mongodb://host.docker.internal:27017/oficina2}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
