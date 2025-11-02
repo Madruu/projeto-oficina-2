@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import healthRoutes from "./routes/health.routes.js";
 import connectDB from "./config/db.js";
 import oficinaRoutes from "./routes/oficina.routes.js";
+import voluntarioRoutes from "./routes/voluntario.routes.js";
 
 // Carrega variáveis de ambiente
 dotenv.config();
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 // Rotas
 app.use("/health", healthRoutes);
 app.use('/oficinas', oficinaRoutes);
+app.use('/voluntarios', voluntarioRoutes);
 
 // Função para iniciar o servidor
 const startServer = async () => {
