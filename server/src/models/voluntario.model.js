@@ -27,7 +27,8 @@ const VoluntarioSchema = new Schema({
     endereco: { type: String, trim: true },
     dataEntrada: { type: Date },
     dataSaida: { type: Date },
-    ativo: { type: Boolean, default: true }
+    ativo: { type: Boolean, default: true },
+    oficinaId: [{ type: Schema.Types.ObjectId, ref: 'Oficina' }]
 }, { timestamps: true });
 
 export default mongoose.models.Voluntario || mongoose.model('Voluntario', VoluntarioSchema);
