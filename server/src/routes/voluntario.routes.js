@@ -54,6 +54,10 @@ router.get('/:id', async (req, res) => {
  */
 router.put('/:id', async (req, res) => {
     try {
+        const isDataSaidaInserted = req.body.dataSaida !== undefined;
+        if (isDataSaidaInserted) {
+            req.body.ativo = false;
+        }
         const updated = await Voluntario.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
         if (!updated) return res.status(404).json({ error: 'Voluntario não encontrado' });
         return res.json(updated);
