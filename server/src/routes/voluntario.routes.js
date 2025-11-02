@@ -67,6 +67,41 @@ router.put('/:id', async (req, res) => {
 });
 
 /**
+ * @route   POST /volunteers/:id/assign
+ * @desc    Associa uma oficina a um voluntário
+ * @access  Public
+ */
+router.post('/:id/assign', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { oficinaId } = req.body;
+
+        if (!oficinaId) return res.status(400).json({ error: 'Informe o ID da oficina' });
+
+        const voluntario = await Voluntario.findById(id);
+        if (!voluntario) return res.status(404).json({ error: 'Voluntário não encontrado' });
+        if (!Array.isArray(voluntario.oficinaId)) {
+            voluntario.oficinaId = [];
+        }
+
+        if (!voluntario.oficinaId.includes(oficinaId)) {
+            voluntario.oficinaId.push(oficinaId);
+            await voluntario.save();
+        }
+
+        const voluntarioPopulado = await Voluntario.findById(id)
+            .populate('oficinaId', 'titulo descricao data local responsavel');
+
+        return res.json({
+            message: 'Oficina associada com sucesso',
+            voluntario: voluntarioPopulado
+        });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+});
+
+/**
  * @route   DELETE /voluntarios/:id
  * @desc    Deleta um voluntário por ID
  * @access  Public
