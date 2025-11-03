@@ -5,7 +5,7 @@ import healthRoutes from "./routes/health.routes.js";
 import connectDB from "./config/db.js";
 import oficinaRoutes from "./routes/oficina.routes.js";
 import voluntarioRoutes from "./routes/voluntario.routes.js";
-
+import authRoutes from "./routes/auth.routes.js";
 // Carrega variáveis de ambiente
 dotenv.config();
 
@@ -18,6 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Rotas
+app.use('/auth', authRoutes)
 app.use("/health", healthRoutes);
 app.use('/oficinas', oficinaRoutes);
 app.use('/voluntarios', voluntarioRoutes);

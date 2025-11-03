@@ -22,12 +22,14 @@
     "docker:down": "docker compose down"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "jsonwebtoken": "^9.0.2"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "mongoose": "^8.19.2"
   }
 }

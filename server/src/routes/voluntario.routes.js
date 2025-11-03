@@ -1,14 +1,15 @@
 import express from 'express';
 import Voluntario from '../models/voluntario.model.js';
+import { authenticate, authorize } from '../middleware/auth.middleware.js'
 
 const router = express.Router();
 
 /**
  * @route   POST /voluntarios
  * @desc    Cria um novo voluntário
- * @access  Public
+ * @access  Admin
  */
-router.post('/', async (req, res) => {
+router.post('/', authenticate, authorize('admin'), async (req, res) => {
     try {
         const voluntario = new Voluntario(req.body);
         const saved = await voluntario.save();
@@ -21,9 +22,9 @@ router.post('/', async (req, res) => {
 /**
  * @route   GET /voluntarios
  * @desc    Lista todos os voluntários
- * @access  Public
+ * @access  Admin
  */
-router.get('/', async (req, res) => {
+router.get('/', authenticate, authorize('admin'), async (req, res) => {
     try {
         const list = await Voluntario.find().sort({ createdAt: -1 });
         return res.json(list);
@@ -33,11 +34,21 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * @route   GET /voluntarios/me
+ * @desc    Acessa própria página de usuário
+ * @access  Admin e Usuário
+ */
+
+router.get('/me', authenticate, authorize('voluntario', 'admin'), (req, res) => {
+    res.json({ message: `Bem-vindo, ${req.user.role}!`, userId: req.user.id })
+})
+
+/**
  * @route   GET /voluntarios/:id
  * @desc    Lista um voluntário por ID
- * @access  Public
+ * @access  Admin
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticate, authorize('admin'),async (req, res) => {
     try {
         const voluntario = await Voluntario.findById(req.params.id);
         if (!voluntario) return res.status(404).json({ error: 'Voluntário não encontrado' });
@@ -52,7 +63,7 @@ router.get('/:id', async (req, res) => {
  * @desc    Atualiza um voluntário por ID
  * @access  Public
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticate, authorize('admin'), async (req, res) => {
     try {
         const isDataSaidaInserted = req.body.dataSaida !== undefined;
         if (isDataSaidaInserted) {
@@ -71,7 +82,7 @@ router.put('/:id', async (req, res) => {
  * @desc    Associa uma oficina a um voluntário
  * @access  Public
  */
-router.post('/:id/assign', async (req, res) => {
+router.post('/:id/assign', authenticate, authorize('admin'), async (req, res) => {
     try {
         const { id } = req.params;
         const { oficinaId } = req.body;
@@ -106,7 +117,7 @@ router.post('/:id/assign', async (req, res) => {
  * @desc    Deleta um voluntário por ID
  * @access  Public
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticate, authorize('admin'), async (req, res) => {
     try {
         const removed = await Voluntario.findByIdAndDelete(req.params.id);
         if (!removed) return res.status(404).json({ error: 'Voluntário não encontrado' });
