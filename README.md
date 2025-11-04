@@ -1,53 +1,165 @@
 # 📌 Sistema de Controle de Voluntários  
 
-Projeto acadêmico desenvolvido para gerenciar voluntários de um projeto social, incluindo cadastro, controle de datas de entrada/saída, oficinas em que já atuaram e geração de termos de voluntariado.  
+Projeto acadêmico desenvolvido para gerenciar voluntários de um projeto social, permitindo o **cadastro de participantes**, **controle de datas de entrada e saída**, **registro das oficinas em que atuaram** e **geração automática de termos de voluntariado**.
 
 ---
 
 ## 👥 Integrantes do Grupo
-- Mateus Chicoli Pedreira  
-- Pedro Henrique Lima Donini
-- Victor Motta de Oliveira  
-- Vitor Encinas Negrão de Tulio  
+
+- **Mateus Chicoli Pedreira**
+- **Pedro Henrique Lima Donini**
+- **Victor Motta de Oliveira**
+- **Vitor Encinas Negrão de Tulio**
 
 ---
 
-## 🎯 Objetivos do Sistema
-O sistema visa facilitar a gestão de voluntários e suas atividades dentro do projeto, permitindo:  
-- Cadastro de voluntários.  
-- Controle de datas de entrada e saída.  
-- Associação de voluntários às oficinas.  
-- Histórico de participação em oficinas.  
-- Geração de termo de voluntariado em PDF.  
-- Relatórios de voluntários ativos/inativos.  
+## 🧩 Visão Geral do Projeto
+
+Este repositório contém uma aplicação **full-stack** dividida em duas partes principais:
+
+- **`client`** → frontend em **React (Vite + Tailwind CSS)**
+- **`server`** → backend em **Node.js (Express)** com **MongoDB (Mongoose)**
+
+O sistema também conta com **autenticação JWT**, **testes automatizados com Jest**, **pipeline CI via GitHub Actions** e **execução em containers Docker**.
+
+---
+
+## ⚙️ Tecnologias Utilizadas
+
+| Camada | Tecnologias |
+|--------|--------------|
+| Frontend | React, Vite, Tailwind CSS |
+| Backend | Node.js, Express |
+| Banco de Dados | MongoDB (Mongoose) |
+| Testes | Jest + Supertest |
+| CI/CD | GitHub Actions |
+| Containerização | Docker + Docker Compose |
+
+---
+
+## 🗂️ Estrutura do Repositório
+
+📦 sistema-voluntarios
+ ┣ 📂 client                # Frontend (React + Vite)
+ ┣ 📂 server                # Backend (Node + Express + MongoDB)
+ ┣ 📂 .github/workflows     # Pipeline CI (GitHub Actions)
+ ┣ 📜 docker-compose.yml    # Orquestração local (frontend, backend, mongo)
+ ┣ 📜 package.json
+ ┗ 📜 README.md
+
+---
+
+## 🧱 Requisitos do Sistema
+
+- **Node.js** v16+
+- **npm** v8+ (ou pnpm/yarn)
+- **Docker & Docker Compose** (opcional, mas recomendado)
+
+---
+
+## 🔐 Variáveis de Ambiente (Backend)
+
+Crie um arquivo `.env` dentro da pasta `server/` com as seguintes variáveis:
+
+MONGO_URI=mongodb://localhost:27017/oficina2
+PORT=3000
+JWT_SECRET=uma_chave_secreta_aqui
+
+> 💡 Em ambiente Docker, use `mongodb://mongo:27017/oficina2` como URI.
+
+---
+
+## 🧩 Scripts Principais
+
+### Rodar tudo em modo desenvolvimento:
+npm run dev
+
+### Apenas backend:
+npm run dev:server
+
+### Apenas frontend:
+npm run dev:client
+
+### Rodar testes:
+npm run test
+
+### Subir containers:
+docker compose up --build
+
+---
+
+## 🧪 Testes Automatizados
+
+O backend possui testes automatizados utilizando **Jest** e **Supertest**, garantindo a confiabilidade da API.  
+
+- Testes locais:
+  npm run test
+
+- Estrutura dos testes:
+  server/__tests__/
+  ┣─ auth.test.js
+  ┣─ volunteer.test.js
+  ┗─ workshop.test.js
+
+---
+
+## 🔄 Integração Contínua (CI)
+
+A integração contínua está configurada com **GitHub Actions**, garantindo que todo **push** e **pull request** dispare automaticamente o workflow de build e testes.
+
+📄 **Arquivo:** `.github/workflows/ci.yml`
+
+O workflow executa:
+1. Instalação das dependências (`npm install`)  
+2. Execução dos testes (`npm test`)  
+3. Bloqueio do merge se os testes falharem  
+
+✅ **Critérios de Aceite:**
+- Workflow executa corretamente em push e PR  
+- Build e testes passam sem erros  
+- PRs não podem ser mesclados se os testes falharem  
+
+---
+
+## 🧰 Execução com Docker
+
+Para replicar o ambiente completo (frontend + backend + banco de dados):
+
+docker compose up --build
+
+Rodar em background:
+docker compose up -d --build
+
+Encerrar containers:
+docker compose down
 
 ---
 
 ## ✅ Requisitos Funcionais
-| ID   | Requisito Funcional              | Descrição                                                                                                                                                        | Prioridade |
-| ---- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| RF01 | Cadastro de Voluntário           | O sistema deve permitir o cadastro de voluntários com dados pessoais (nome completo, CPF, RG, e-mail, telefone, endereço)                                        | Alta       |
-| RF02 | Registro de Datas                | O sistema deve registrar **data de entrada** e **data de saída** do voluntário no projeto                                                                        | Alta       |
-| RF03 | Atualização de Dados             | O sistema deve permitir a edição/atualização dos dados de um voluntário cadastrado                                                                               | Média      |
-| RF04 | Inativação de Voluntário         | O sistema deve permitir marcar um voluntário como “inativo” ao registrar sua data de saída                                                                       | Média      |
-| RF05 | Cadastro de Oficinas             | O sistema deve permitir cadastrar oficinas com dados básicos (título, descrição, data, local, responsável)                                                       | Alta       |
-| RF06 | Associação Voluntário–Oficina    | O sistema deve permitir vincular voluntários às oficinas em que atuaram (com função exercida e período)                                                          | Alta       |
-| RF07 | Histórico de Participação        | O sistema deve exibir o histórico completo de oficinas em que cada voluntário atuou                                                                              | Média      |
-| RF08 | Geração de Termo de Voluntariado | O sistema deve gerar automaticamente um termo de voluntariado (em PDF) para cada voluntário, contendo dados pessoais, período de atuação e oficinas em que atuou | Alta       |
-| RF09 | Download/Impressão do Termo      | O sistema deve permitir o download ou impressão do termo de voluntariado gerado                                                                                  | Média      |
-| RF10 | Busca e Filtro de Voluntários    | O sistema deve permitir buscar voluntários por nome, CPF ou oficina em que atuaram                                                                               | Média      |
-| RF11 | Autenticação e Perfis de Acesso  | O sistema deve permitir autenticação de usuários e diferenciar permissões (administrador x voluntário)                                                           | Alta       |
-| RF12 | Dashboard Resumido (opcional)    | O sistema deve apresentar um painel com número de voluntários ativos, oficinas cadastradas, termos gerados                                                       | Baixa      | 
+
+| ID | Requisito | Descrição | Prioridade |
+|----|------------|------------|-------------|
+| RF01 | Cadastro de Voluntário | Permitir o cadastro de voluntários com dados pessoais (nome, CPF, RG, e-mail, telefone, endereço) | Alta |
+| RF02 | Registro de Datas | Registrar **data de entrada** e **data de saída** | Alta |
+| RF03 | Atualização de Dados | Editar e atualizar informações de voluntários | Média |
+| RF04 | Inativação de Voluntário | Marcar voluntário como inativo ao registrar a saída | Média |
+| RF05 | Cadastro de Oficinas | Cadastrar oficinas com título, descrição, data e responsável | Alta |
+| RF06 | Associação Voluntário–Oficina | Vincular voluntários às oficinas que participaram | Alta |
+| RF07 | Histórico de Participação | Exibir histórico completo de oficinas por voluntário | Média |
+| RF08 | Geração de Termo de Voluntariado | Gerar PDF com dados pessoais e histórico de atuação | Alta |
+| RF09 | Download/Impressão do Termo | Permitir download ou impressão do termo | Média |
+| RF10 | Busca e Filtro de Voluntários | Buscar por nome, CPF ou oficina | Média |
+| RF11 | Autenticação e Perfis | Diferenciar permissões de **Admin** e **Voluntário** via JWT | Alta |
+| RF12 | Dashboard (opcional) | Exibir resumo com estatísticas gerais | Baixa |
 
 ---
 
 ## 🏗️ Arquitetura em Alto Nível
 
-### Tecnologias
-- **Frontend:** React + Tailwind
-- **Backend:** Node.js (Express)
-- **Banco de Dados:** MongoDB  
-- **Testes:** Jest
+- **Frontend:** React + Tailwind CSS  
+- **Backend:** Node.js (Express)  
+- **Banco:** MongoDB  
+- **Testes:** Jest  
 - **CI/CD:** GitHub Actions  
 - **Containerização:** Docker  
 
@@ -55,18 +167,32 @@ O sistema visa facilitar a gestão de voluntários e suas atividades dentro do p
 
 ## 📅 Cronograma
 
-| Período                             | Atividade                                                                                                                                                                                                                                                                                                                 | Entregáveis                                                             |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| **15/09 – 22/09** (1ª semana)       | **Planejamento inicial**<br>- Definir tema e equipe<br>- Levantar requisitos funcionais<br>- Desenhar arquitetura em alto nível<br>- Definir estratégia de automação de testes (Jest + GitHub Actions)<br>- Definir tecnologias (React, Node, MongoDB, Docker)<br>- Criar repositório GitHub com README e pastas iniciais | Documento de requisitos + Diagrama de arquitetura + Repositório inicial |
-| **23/09 – 29/09** (2ª semana)       | **Configuração do ambiente**<br>- Criar Docker Compose com backend, frontend, MongoDB<br>- Configurar pipeline GitHub Actions (build + testes)<br>- Escrever testes iniciais (placeholder)                                                                                                                                | Ambiente pronto (Docker + GitHub Actions)                               |
-| **30/09 – 13/10** (3ª e 4ª semanas) | **Sprint 1 – Desenvolvimento**<br>- Implementar cadastro de voluntários (CRUD)<br>- Implementar cadastro de oficinas (CRUD)<br>- Implementar autenticação básica (admin x voluntário)<br>- Criar testes unitários das funcionalidades implementadas                                                                       | Código + testes funcionando para RF01–RF06                              |
-| **14/10 – 18/10** (5ª semana)       | **Sprint Review 1**<br>- Gravar vídeo (até 3 min) mostrando funcionalidades e testes<br>- Submeter repositório atualizado                                                                                                                                                                                                 | Vídeo Sprint 1 + Repositório atualizado                                 |
-| **19/10 – 25/10** (6ª semana)       | Ajustes solicitados pelo professor do Sprint 1                                                                                                                                                                                                                                                                            | Correções aplicadas                                                     |
-| **26/10 – 16/11** (7ª a 9ª semanas) | **Sprint 2 – Desenvolvimento**<br>- Implementar geração de termo de voluntariado (PDF)<br>- Implementar histórico de atuação de voluntários<br>- Buscar/filtrar voluntários<br>- Exportar dados (CSV/Excel)<br>- Criar testes unitários/integração                                                                        | Código + testes funcionando para RF07–RF12                              |
-| **17/11 – 21/11** (10ª semana)      | **Sprint Review 2**<br>- Gravar vídeo (até 3 min) mostrando funcionalidades e testes<br>- Submeter repositório atualizado                                                                                                                                                                                                 | Vídeo Sprint 2 + Repositório atualizado                                 |
-| **22/11 – 29/11** (11ª semana)      | Ajustes finais (bugs, novos requisitos, melhorias solicitadas pelo professor)                                                                                                                                                                                                                                             | Versão final do sistema + testes                                        |
-| **30/11 – 08/12** (12ª semana)      | **Entrega Final**<br>- Consolidar documentação<br>- Atualizar README e diagramas<br>                                                                                                                                                                                      | Projeto final no GitHub, documentação e testes completos                |
+| Período | Atividade | Entregáveis |
+|----------|------------|-------------|
+| **15/09 – 22/09** | Planejamento inicial, levantamento de requisitos e setup do repositório | Documento de requisitos + diagrama + repo inicial |
+| **23/09 – 29/09** | Configuração do ambiente (Docker + GitHub Actions) | Pipeline e containers prontos |
+| **30/09 – 13/10** | Sprint 1 – CRUD de voluntários e oficinas + autenticação | Código + testes RF01–RF06 |
+| **14/10 – 18/10** | Sprint Review 1 + vídeo demonstrativo | Vídeo Sprint 1 |
+| **26/10 – 16/11** | Sprint 2 – termo de voluntariado + filtros + histórico | Código + testes RF07–RF12 |
+| **17/11 – 21/11** | Sprint Review 2 + vídeo final | Vídeo Sprint 2 |
+| **30/11 – 08/12** | Entrega final e documentação | Projeto completo + README atualizado |
+
 ---
 
-### Diagrama de Arquitetura
+## 🧭 Diagrama de Arquitetura
+
 ![diagrama_oficina2](https://github.com/user-attachments/assets/88e7d72d-0427-41b1-8dea-fe65bb9d3011)
+
+---
+
+## 📹 Vídeo Demonstrativo
+
+🎥 *Demonstração do sistema completo: autenticação JWT, CRUD de voluntários e oficinas, geração de termo em PDF e execução automática de testes via GitHub Actions.*
+
+(Link do vídeo será adicionado aqui após upload.)
+
+---
+
+## 🪪 Licença
+
+Distribuído sob a licença **ISC**. Consulte o `package.json` para mais detalhes.
