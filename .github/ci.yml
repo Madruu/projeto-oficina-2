@@ -2,28 +2,28 @@ name: CI - Build e Testes
 
 on:
   push:
-    branches: ["main", "develop"]
+    branches: [ main, dev ]
   pull_request:
-    branches: ["main", "develop"]
+    branches: [ main, dev ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🔹 Checkout do código
+      - name: 🛎️ Checkout do código
         uses: actions/checkout@v4
 
-      - name: 🔹 Configurar Node.js
+      - name: 🧩 Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: 🔹 Instalar dependências
+      - name: 📦 Instalar dependências
         run: npm install
 
-      - name: 🔹 Rodar build (se existir)
-        run: npm run build --if-present
-
-      - name: 🔹 Rodar testes automatizados
-        run: npm test
+      - name: 🧪 Rodar testes do backend
+        working-directory: server
+        run: |
+          npm install
+          npm test
