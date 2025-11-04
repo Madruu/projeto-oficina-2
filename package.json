@@ -23,7 +23,9 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
-    "jsonwebtoken": "^9.0.2"
+    "jest": "^30.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "supertest": "^7.1.4"
   },
   "keywords": [],
   "author": "",
