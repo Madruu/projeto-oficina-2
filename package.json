@@ -14,24 +14,16 @@
     "build": "npm run build --workspaces",
     "build:server": "npm run build --workspace=server",
     "build:client": "npm run build --workspace=client",
-    "test": "npm run test --workspaces",
-    "test:server": "npm run test --workspace=server",
-    "test:client": "npm run test --workspace=client",
+    "test": "npm run test --workspace=server",
+    "test:coverage": "npm run test:coverage --workspace=server",
     "start": "npm run start --workspace=server",
     "docker:up": "docker compose up backend frontend",
     "docker:down": "docker compose down"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "jest": "^30.2.0",
-    "jsonwebtoken": "^9.0.2",
-    "supertest": "^7.1.4"
+    "concurrently": "^8.2.2"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^6.0.0",
-    "mongoose": "^8.19.2"
-  }
+  "license": "ISC"
 }
