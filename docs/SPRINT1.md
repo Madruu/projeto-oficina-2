@@ -8,8 +8,6 @@ Documentação completa da Sprint 1 do projeto Sistema de Controle de Voluntári
 
 ![Quadro Kanban](./kanban-sprint1.png)
 
-> 📝 **Nota:** Adicione o print do quadro Kanban (GitHub Projects, Trello, Jira, etc.) em `docs/kanban-sprint1.png` mostrando o progresso da Sprint 1.
-
 ---
 
 ## 🧪 Testes Automatizados
@@ -77,8 +75,6 @@ O workflow retorna status de **sucesso** ou **falha**:
 ### Print do Pipeline
 
 ![Pipeline CI/CD](./pipeline-ci-cd.png)
-
-> 📝 **Nota:** Adicione o print da pipeline após executar o workflow no GitHub Actions. O arquivo deve ser salvo em `docs/pipeline-ci-cd.png`.
 
 ### Configuração de Branch Protection
 
