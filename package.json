@@ -1,8 +1,8 @@
 {
-  "name": "oficina-2",
+  "name": "ellp",
   "version": "1.0.0",
   "private": true,
-  "description": "Sistema de Controle de Voluntários",
+  "description": "ELLP - Ensino Lúdico de Lógica e Programação",
   "workspaces": [
     "client",
     "server"
