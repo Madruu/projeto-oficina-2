@@ -35,6 +35,10 @@ services:
       PORT: 8000
       # Conecta ao MongoDB via nome do serviço Docker
       MONGO_URI: ${MONGO_URI:-mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DATABASE:-oficina2}?authSource=admin}
+      # Credenciais do admin padrão
+      ADMIN_NAME: ${ADMIN_NAME:-Administrador}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@ellp.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
     depends_on:
       mongodb:
         condition: service_healthy

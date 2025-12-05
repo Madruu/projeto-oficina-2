@@ -1,23 +1,25 @@
-import { useState, useEffect, useMemo } from 'react';
-import { volunteerService } from '../services/api';
-import { useToast } from '../context/ToastContext';
-import Layout from '../components/Layout';
-import Modal from '../components/Modal';
-import ConfirmDialog from '../components/ConfirmDialog';
-import VolunteerForm from '../components/VolunteerForm';
+import { useState, useEffect, useMemo } from "react";
+import { volunteerService } from "../services/api";
+import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
+import Layout from "../components/Layout";
+import Modal from "../components/Modal";
+import ConfirmDialog from "../components/ConfirmDialog";
+import VolunteerForm from "../components/VolunteerForm";
 
 export default function Volunteers() {
   const [volunteers, setVolunteers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toast = useToast();
+  const { canEdit, canDelete } = useAuth();
 
   // Fetch volunteers
   const fetchVolunteers = async () => {
@@ -28,7 +30,7 @@ export default function Volunteers() {
       setVolunteers(data);
     } catch (err) {
       setError(err.message);
-      toast.error('Erro ao carregar voluntários: ' + err.message);
+      toast.error("Erro ao carregar voluntários: " + err.message);
     } finally {
       setIsLoading(false);
     }
@@ -47,9 +49,9 @@ export default function Volunteers() {
         v.cpf?.includes(searchTerm);
 
       const matchesStatus =
-        statusFilter === 'all' ||
-        (statusFilter === 'active' && v.ativo) ||
-        (statusFilter === 'inactive' && !v.ativo);
+        statusFilter === "all" ||
+        (statusFilter === "active" && v.ativo) ||
+        (statusFilter === "inactive" && !v.ativo);
 
       return matchesSearch && matchesStatus;
     });
@@ -79,10 +81,10 @@ export default function Volunteers() {
     try {
       if (selectedVolunteer) {
         await volunteerService.update(selectedVolunteer._id, data);
-        toast.success('Voluntário atualizado com sucesso!');
+        toast.success("Voluntário atualizado com sucesso!");
       } else {
         await volunteerService.create(data);
-        toast.success('Voluntário cadastrado com sucesso!');
+        toast.success("Voluntário cadastrado com sucesso!");
       }
       setIsFormModalOpen(false);
       fetchVolunteers();
@@ -99,7 +101,7 @@ export default function Volunteers() {
     setIsSubmitting(true);
     try {
       await volunteerService.delete(selectedVolunteer._id);
-      toast.success('Voluntário removido com sucesso!');
+      toast.success("Voluntário removido com sucesso!");
       setIsDeleteDialogOpen(false);
       fetchVolunteers();
     } catch (err) {
@@ -111,8 +113,8 @@ export default function Volunteers() {
 
   // Format date
   const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString("pt-BR");
   };
 
   return (
@@ -120,7 +122,9 @@ export default function Volunteers() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-100 mb-2">Voluntários</h1>
-        <p className="text-slate-400">Gerencie os voluntários cadastrados no sistema</p>
+        <p className="text-slate-400">
+          Gerencie os voluntários cadastrados no sistema
+        </p>
       </div>
 
       {/* Actions bar */}
@@ -164,16 +168,28 @@ export default function Volunteers() {
             </select>
           </div>
 
-          {/* Add button */}
-          <button
-            onClick={handleCreate}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-semibold rounded-lg hover:from-cyan-600 hover:to-teal-600 transition-all shadow-lg shadow-cyan-500/25"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Novo Voluntário
-          </button>
+          {/* Add button - only for users who can edit */}
+          {canEdit() && (
+            <button
+              onClick={handleCreate}
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-semibold rounded-lg hover:from-cyan-600 hover:to-teal-600 transition-all shadow-lg shadow-cyan-500/25"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Novo Voluntário
+            </button>
+          )}
         </div>
       </div>
 
@@ -181,8 +197,19 @@ export default function Volunteers() {
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
           <div className="flex flex-col items-center gap-4">
-            <svg className="animate-spin w-10 h-10 text-cyan-500" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <svg
+              className="animate-spin w-10 h-10 text-cyan-500"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
               <path
                 className="opacity-75"
                 fill="currentColor"
@@ -196,7 +223,12 @@ export default function Volunteers() {
         <div className="flex items-center justify-center h-64">
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="w-16 h-16 rounded-full bg-rose-500/10 flex items-center justify-center">
-              <svg className="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-8 h-8 text-rose-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -206,7 +238,9 @@ export default function Volunteers() {
               </svg>
             </div>
             <div>
-              <p className="text-slate-300 font-medium">Erro ao carregar voluntários</p>
+              <p className="text-slate-300 font-medium">
+                Erro ao carregar voluntários
+              </p>
               <p className="text-slate-500 text-sm mt-1">{error}</p>
             </div>
             <button
@@ -221,7 +255,12 @@ export default function Volunteers() {
         <div className="flex items-center justify-center h-64">
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center">
-              <svg className="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-8 h-8 text-slate-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -232,14 +271,16 @@ export default function Volunteers() {
             </div>
             <div>
               <p className="text-slate-300 font-medium">
-                {searchTerm || statusFilter !== 'all'
-                  ? 'Nenhum voluntário encontrado'
-                  : 'Nenhum voluntário cadastrado'}
+                {searchTerm || statusFilter !== "all"
+                  ? "Nenhum voluntário encontrado"
+                  : "Nenhum voluntário cadastrado"}
               </p>
               <p className="text-slate-500 text-sm mt-1">
-                {searchTerm || statusFilter !== 'all'
-                  ? 'Tente ajustar os filtros de busca'
-                  : 'Clique em "Novo Voluntário" para começar'}
+                {searchTerm || statusFilter !== "all"
+                  ? "Tente ajustar os filtros de busca"
+                  : canEdit()
+                  ? 'Clique em "Novo Voluntário" para começar'
+                  : "Aguarde um administrador cadastrar voluntários"}
               </p>
             </div>
           </div>
@@ -265,9 +306,11 @@ export default function Volunteers() {
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    Ações
-                  </th>
+                  {(canEdit() || canDelete()) && (
+                    <th className="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      Ações
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700">
@@ -282,17 +325,23 @@ export default function Volunteers() {
                           {volunteer.nomeCompleto?.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-medium text-slate-100">{volunteer.nomeCompleto}</p>
+                          <p className="font-medium text-slate-100">
+                            {volunteer.nomeCompleto}
+                          </p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div>
                         {volunteer.email && (
-                          <p className="text-sm text-slate-300">{volunteer.email}</p>
+                          <p className="text-sm text-slate-300">
+                            {volunteer.email}
+                          </p>
                         )}
                         {volunteer.telefone && (
-                          <p className="text-sm text-slate-500">{volunteer.telefone}</p>
+                          <p className="text-sm text-slate-500">
+                            {volunteer.telefone}
+                          </p>
                         )}
                         {!volunteer.email && !volunteer.telefone && (
                           <p className="text-sm text-slate-500">-</p>
@@ -300,54 +349,74 @@ export default function Volunteers() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm text-slate-300">{volunteer.cpf || '-'}</span>
+                      <span className="text-sm text-slate-300">
+                        {volunteer.cpf || "-"}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm text-slate-300">{formatDate(volunteer.dataEntrada)}</span>
+                      <span className="text-sm text-slate-300">
+                        {formatDate(volunteer.dataEntrada)}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           volunteer.ativo
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                            : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            : "bg-slate-500/10 text-slate-400 border border-slate-500/20"
                         }`}
                       >
-                        {volunteer.ativo ? 'Ativo' : 'Inativo'}
+                        {volunteer.ativo ? "Ativo" : "Inativo"}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleEdit(volunteer)}
-                          className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors"
-                          title="Editar"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleDeleteClick(volunteer)}
-                          className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
-                          title="Excluir"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
+                    {(canEdit() || canDelete()) && (
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-end gap-2">
+                          {canEdit() && (
+                            <button
+                              onClick={() => handleEdit(volunteer)}
+                              className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors"
+                              title="Editar"
+                            >
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                />
+                              </svg>
+                            </button>
+                          )}
+                          {canDelete() && (
+                            <button
+                              onClick={() => handleDeleteClick(volunteer)}
+                              className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+                              title="Excluir"
+                            >
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -357,7 +426,8 @@ export default function Volunteers() {
           {/* Footer with count */}
           <div className="px-6 py-3 border-t border-slate-700 bg-slate-800/50">
             <p className="text-sm text-slate-500">
-              Mostrando {filteredVolunteers.length} de {volunteers.length} voluntários
+              Mostrando {filteredVolunteers.length} de {volunteers.length}{" "}
+              voluntários
             </p>
           </div>
         </div>
@@ -367,7 +437,7 @@ export default function Volunteers() {
       <Modal
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}
-        title={selectedVolunteer ? 'Editar Voluntário' : 'Novo Voluntário'}
+        title={selectedVolunteer ? "Editar Voluntário" : "Novo Voluntário"}
         size="md"
       >
         <VolunteerForm
@@ -392,4 +462,3 @@ export default function Volunteers() {
     </Layout>
   );
 }
-
