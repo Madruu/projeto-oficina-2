@@ -62,6 +62,7 @@ services:
     # Vite com hot reload em desenvolvimento
     environment:
       - NODE_ENV=development
+      - VITE_API_URL=http://localhost:8000
 
 volumes:
   mongodb_data:
