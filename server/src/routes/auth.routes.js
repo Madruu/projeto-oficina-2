@@ -1,8 +1,15 @@
-import express from 'express'
-import { login, register } from '../controllers/auth.controller.js'
-const router = express.Router()
+import express from "express";
+import { login, register, getMe, updateMe } from "../controllers/auth.controller.js";
+import { authenticate } from "../middleware/auth.middleware.js";
 
-router.post('/login', login)
-router.post('/register', register)
+const router = express.Router();
 
-export default router
+// Rotas públicas
+router.post("/login", login);
+router.post("/register", register);
+
+// Rotas protegidas
+router.get("/me", authenticate, getMe);
+router.put("/me", authenticate, updateMe);
+
+export default router;
