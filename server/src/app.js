@@ -23,4 +23,17 @@ app.use("/health", healthRoutes);
 app.use("/oficinas", oficinaRoutes);
 app.use("/voluntarios", voluntarioRoutes);
 
+// Middleware de tratamento de erros (deve ser o último)
+app.use((err, req, res, next) => {
+  console.error("Erro não tratado:", err);
+  res.status(err.status || 500).json({
+    error: err.message || "Erro interno do servidor",
+  });
+});
+
+// Middleware para rotas não encontradas
+app.use((req, res) => {
+  res.status(404).json({ error: "Rota não encontrada" });
+});
+
 export default app;

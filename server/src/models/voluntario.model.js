@@ -16,7 +16,11 @@ const VoluntarioSchema = new Schema({
                 const existing = Vol ? await Vol.findOne({ cpf: value }).exec() : null;
                 if (!existing) return true;
                 // permite quando o CPF pertence ao próprio documento (update)
-                if (this._id) return existing._id.equals(this._id);
+                if (this._id) {
+                    const currentId = this._id.toString();
+                    const existingId = existing._id.toString();
+                    return currentId === existingId;
+                }
                 return false;
             },
             message: 'CPF já cadastrado'
