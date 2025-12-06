@@ -2,12 +2,13 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const VoluntarioSchema = new Schema({
-    nomeCompleto: { type: String, required: true, trim: true },
+    nomeCompleto: { type: String, required: true, trim: true, index: true },
     cpf: {
         type: String,
         trim: true,
         unique: true,
         sparse: true,
+        index: true,
         validate: {
             validator: async function (value) {
                 if (!value) return true; // permite ausência de CPF
@@ -28,7 +29,7 @@ const VoluntarioSchema = new Schema({
     dataEntrada: { type: Date },
     dataSaida: { type: Date },
     ativo: { type: Boolean, default: true },
-    oficinaId: [{ type: Schema.Types.ObjectId, ref: 'Oficina' }]
+    oficinaId: [{ type: Schema.Types.ObjectId, ref: 'Oficina', index: true }]
 }, { timestamps: true });
 
 export default mongoose.models.Voluntario || mongoose.model('Voluntario', VoluntarioSchema);

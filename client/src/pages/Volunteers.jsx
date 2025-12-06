@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { volunteerService } from "../services/api";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { volunteerService, workshopService } from "../services/api";
 import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
 import Layout from "../components/Layout";
@@ -9,9 +9,12 @@ import VolunteerForm from "../components/VolunteerForm";
 
 export default function Volunteers() {
   const [volunteers, setVolunteers] = useState([]);
+  const [workshops, setWorkshops] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [nomeFilter, setNomeFilter] = useState("");
+  const [cpfFilter, setCpfFilter] = useState("");
+  const [oficinaFilter, setOficinaFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -21,12 +24,27 @@ export default function Volunteers() {
   const toast = useToast();
   const { canEdit, canDelete } = useAuth();
 
-  // Fetch volunteers
-  const fetchVolunteers = async () => {
+  // Fetch workshops for filter dropdown
+  const fetchWorkshops = async () => {
+    try {
+      const data = await workshopService.getAll();
+      setWorkshops(data);
+    } catch (err) {
+      console.error("Erro ao carregar oficinas:", err);
+    }
+  };
+
+  // Fetch volunteers with current filters
+  const fetchVolunteers = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await volunteerService.getAll();
+      const filters = {};
+      if (nomeFilter.trim()) filters.nome = nomeFilter.trim();
+      if (cpfFilter.trim()) filters.cpf = cpfFilter.trim();
+      if (oficinaFilter) filters.oficina = oficinaFilter;
+
+      const data = await volunteerService.getAll(filters);
       setVolunteers(data);
     } catch (err) {
       setError(err.message);
@@ -34,28 +52,45 @@ export default function Volunteers() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [nomeFilter, cpfFilter, oficinaFilter, toast]);
 
   useEffect(() => {
-    fetchVolunteers();
-  }, []);
+    fetchWorkshops();
+    // Initial load without filters
+    setIsLoading(true);
+    volunteerService.getAll({})
+      .then((data) => {
+        setVolunteers(data);
+      })
+      .catch((err) => {
+        setError(err.message);
+        toast.error("Erro ao carregar voluntários: " + err.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [toast]);
 
-  // Filtered volunteers
+  // Debounce effect for search - triggers when filters change
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchVolunteers();
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [fetchVolunteers]);
+
+  // Filtered volunteers (only by status, since other filters are server-side)
   const filteredVolunteers = useMemo(() => {
     return volunteers.filter((v) => {
-      const matchesSearch =
-        v.nomeCompleto?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        v.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        v.cpf?.includes(searchTerm);
-
       const matchesStatus =
         statusFilter === "all" ||
         (statusFilter === "active" && v.ativo) ||
         (statusFilter === "inactive" && !v.ativo);
 
-      return matchesSearch && matchesStatus;
+      return matchesStatus;
     });
-  }, [volunteers, searchTerm, statusFilter]);
+  }, [volunteers, statusFilter]);
 
   // Handle create volunteer
   const handleCreate = () => {
@@ -129,11 +164,11 @@ export default function Volunteers() {
 
       {/* Actions bar */}
       <div className="bg-slate-800 rounded-xl border border-slate-700 p-4 mb-6">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+        <div className="flex flex-col gap-4">
           {/* Search and filters */}
-          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            {/* Search */}
-            <div className="relative">
+          <div className="flex flex-col lg:flex-row gap-3 w-full">
+            {/* Nome filter */}
+            <div className="relative flex-1">
               <svg
                 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
                 fill="none"
@@ -144,16 +179,69 @@ export default function Volunteers() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                 />
               </svg>
               <input
                 type="text"
-                placeholder="Buscar por nome, email ou CPF..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2.5 w-full sm:w-80 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition"
+                placeholder="Buscar por nome..."
+                value={nomeFilter}
+                onChange={(e) => setNomeFilter(e.target.value)}
+                className="pl-10 pr-4 py-2.5 w-full bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition"
               />
+            </div>
+
+            {/* CPF filter */}
+            <div className="relative flex-1">
+              <svg
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
+                />
+              </svg>
+              <input
+                type="text"
+                placeholder="Buscar por CPF..."
+                value={cpfFilter}
+                onChange={(e) => setCpfFilter(e.target.value)}
+                className="pl-10 pr-4 py-2.5 w-full bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition"
+              />
+            </div>
+
+            {/* Oficina filter */}
+            <div className="relative flex-1">
+              <svg
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                />
+              </svg>
+              <select
+                value={oficinaFilter}
+                onChange={(e) => setOficinaFilter(e.target.value)}
+                className="pl-10 pr-4 py-2.5 w-full bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition cursor-pointer appearance-none"
+              >
+                <option value="">Todas as oficinas</option>
+                {workshops.map((workshop) => (
+                  <option key={workshop._id} value={workshop._id}>
+                    {workshop.titulo}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Status filter */}
@@ -168,7 +256,24 @@ export default function Volunteers() {
             </select>
           </div>
 
-          {/* Add button - only for users who can edit */}
+          {/* Clear filters button */}
+          {(nomeFilter || cpfFilter || oficinaFilter) && (
+            <button
+              onClick={() => {
+                setNomeFilter("");
+                setCpfFilter("");
+                setOficinaFilter("");
+              }}
+              className="self-start px-4 py-2 text-sm text-slate-400 hover:text-slate-300 transition-colors"
+            >
+              Limpar filtros
+            </button>
+          )}
+        </div>
+
+        {/* Add button row */}
+        <div className="flex justify-end mt-4">
+
           {canEdit() && (
             <button
               onClick={handleCreate}
@@ -271,12 +376,12 @@ export default function Volunteers() {
             </div>
             <div>
               <p className="text-slate-300 font-medium">
-                {searchTerm || statusFilter !== "all"
+                {(nomeFilter || cpfFilter || oficinaFilter || statusFilter !== "all")
                   ? "Nenhum voluntário encontrado"
                   : "Nenhum voluntário cadastrado"}
               </p>
               <p className="text-slate-500 text-sm mt-1">
-                {searchTerm || statusFilter !== "all"
+                {(nomeFilter || cpfFilter || oficinaFilter || statusFilter !== "all")
                   ? "Tente ajustar os filtros de busca"
                   : canEdit()
                   ? 'Clique em "Novo Voluntário" para começar'

@@ -69,8 +69,16 @@ export const authService = {
 
 // Serviço de Voluntários
 export const volunteerService = {
-  // Lista todos os voluntários
-  getAll: () => request("/voluntarios"),
+  // Lista todos os voluntários com filtros opcionais
+  getAll: (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.nome) params.append('nome', filters.nome);
+    if (filters.cpf) params.append('cpf', filters.cpf);
+    if (filters.oficina) params.append('oficina', filters.oficina);
+    
+    const queryString = params.toString();
+    return request(`/voluntarios${queryString ? `?${queryString}` : ''}`);
+  },
 
   // Busca um voluntário por ID
   getById: (id) => request(`/voluntarios/${id}`),
