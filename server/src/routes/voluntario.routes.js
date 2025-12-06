@@ -148,13 +148,25 @@ router.put(
       if (isDataSaidaInserted) {
         req.body.ativo = false;
       }
-      const updated = await Voluntario.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true, runValidators: true }
-      );
-      if (!updated)
+
+      // Busca o voluntário existente
+      const voluntario = await Voluntario.findById(req.params.id);
+      if (!voluntario)
         return res.status(404).json({ error: "Voluntario não encontrado" });
+
+      if (req.body.cpf && req.body.cpf !== voluntario.cpf) {
+        const existing = await Voluntario.findOne({ 
+          cpf: req.body.cpf,
+          _id: { $ne: req.params.id } 
+        });
+        if (existing) {
+          return res.status(400).json({ error: "CPF já cadastrado" });
+        }
+      }
+      Object.assign(voluntario, req.body);
+      
+      const updated = await voluntario.save();
+      
       return res.json(updated);
     } catch (err) {
       return res.status(400).json({ error: err.message });
