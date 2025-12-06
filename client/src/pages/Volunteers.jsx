@@ -20,6 +20,7 @@ export default function Volunteers() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [downloadingPDF, setDownloadingPDF] = useState(null); // ID do voluntário que está gerando PDF
 
   const toast = useToast();
   const { canEdit, canDelete } = useAuth();
@@ -143,6 +144,19 @@ export default function Volunteers() {
       toast.error(err.message);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Handle PDF download
+  const handleDownloadPDF = async (volunteerId) => {
+    setDownloadingPDF(volunteerId);
+    try {
+      await volunteerService.downloadPDF(volunteerId);
+      toast.success("PDF gerado e baixado com sucesso!");
+    } catch (err) {
+      toast.error("Erro ao gerar PDF: " + err.message);
+    } finally {
+      setDownloadingPDF(null);
     }
   };
 
@@ -411,11 +425,9 @@ export default function Volunteers() {
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     Status
                   </th>
-                  {(canEdit() || canDelete()) && (
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                      Ações
-                    </th>
-                  )}
+                  <th className="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    Ações
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700">
@@ -474,54 +486,95 @@ export default function Volunteers() {
                         {volunteer.ativo ? "Ativo" : "Inativo"}
                       </span>
                     </td>
-                    {(canEdit() || canDelete()) && (
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          {canEdit() && (
-                            <button
-                              onClick={() => handleEdit(volunteer)}
-                              className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors"
-                              title="Editar"
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        {/* Botão Gerar PDF - disponível para todos os usuários autenticados */}
+                        <button
+                          onClick={() => handleDownloadPDF(volunteer._id)}
+                          disabled={downloadingPDF === volunteer._id}
+                          className="p-2 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Gerar PDF"
+                        >
+                          {downloadingPDF === volunteer._id ? (
+                            <svg
+                              className="w-5 h-5 animate-spin"
+                              fill="none"
+                              viewBox="0 0 24 24"
                             >
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
                                 stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                />
-                              </svg>
-                            </button>
-                          )}
-                          {canDelete() && (
-                            <button
-                              onClick={() => handleDeleteClick(volunteer)}
-                              className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
-                              title="Excluir"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              />
+                            </svg>
+                          ) : (
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
                             >
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                />
-                              </svg>
-                            </button>
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              />
+                            </svg>
                           )}
-                        </div>
-                      </td>
-                    )}
+                        </button>
+                        {canEdit() && (
+                          <button
+                            onClick={() => handleEdit(volunteer)}
+                            className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors"
+                            title="Editar"
+                          >
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+                            </svg>
+                          </button>
+                        )}
+                        {canDelete() && (
+                          <button
+                            onClick={() => handleDeleteClick(volunteer)}
+                            className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+                            title="Excluir"
+                          >
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

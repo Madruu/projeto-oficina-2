@@ -1,6 +1,7 @@
 import express from "express";
 import Voluntario from "../models/voluntario.model.js";
 import { authenticate, authorize, ROLES } from "../middleware/auth.middleware.js";
+import { generateVolunteerPDF } from "../services/pdf.service.js";
 
 const router = express.Router();
 
@@ -62,6 +63,51 @@ router.get(
       return res.json(list);
     } catch (err) {
       return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+/**
+ * @route   GET /voluntarios/:id/pdf
+ * @desc    Gera PDF com informações do voluntário
+ * @access  Admin, Coordenador, Visitante
+ */
+router.get(
+  "/:id/pdf",
+  authenticate,
+  authorize(ROLES.ADMIN, ROLES.COORDENADOR, ROLES.VISITANTE),
+  async (req, res) => {
+    try {
+      const voluntario = await Voluntario.findById(req.params.id)
+        .populate('oficinaId', 'titulo descricao data local responsavel');
+      
+      if (!voluntario)
+        return res.status(404).json({ error: "Voluntário não encontrado" });
+
+      // Gera o PDF
+      const doc = generateVolunteerPDF(voluntario);
+
+      // Configura headers para download
+      const fileName = `termo-voluntariado-${voluntario.nomeCompleto.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}.pdf`;
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+
+      // Tratamento de erros no stream do PDF
+      doc.on('error', (err) => {
+        console.error('Erro ao gerar PDF:', err);
+        if (!res.headersSent) {
+          res.status(500).json({ error: 'Erro ao gerar PDF' });
+        }
+      });
+
+      // Pipe do PDF para a resposta
+      doc.pipe(res);
+      doc.end();
+    } catch (err) {
+      console.error('Erro na rota de PDF:', err);
+      if (!res.headersSent) {
+        return res.status(500).json({ error: err.message || 'Erro ao gerar PDF' });
+      }
     }
   }
 );
