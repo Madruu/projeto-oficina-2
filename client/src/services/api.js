@@ -83,6 +83,9 @@ export const volunteerService = {
   // Busca um voluntário por ID
   getById: (id) => request(`/voluntarios/${id}`),
 
+  // Busca o histórico completo de participação do voluntário
+  getHistory: (id) => request(`/voluntarios/${id}/history`),
+
   // Cria um novo voluntário
   create: (data) =>
     request("/voluntarios", {

@@ -6,6 +6,7 @@ import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import ConfirmDialog from "../components/ConfirmDialog";
 import VolunteerForm from "../components/VolunteerForm";
+import VolunteerHistory from "../components/VolunteerHistory";
 
 export default function Volunteers() {
   const [volunteers, setVolunteers] = useState([]);
@@ -18,6 +19,7 @@ export default function Volunteers() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(null); // ID do voluntário que está gerando PDF
@@ -109,6 +111,12 @@ export default function Volunteers() {
   const handleDeleteClick = (volunteer) => {
     setSelectedVolunteer(volunteer);
     setIsDeleteDialogOpen(true);
+  };
+
+  // Handle history click
+  const handleHistoryClick = (volunteer) => {
+    setSelectedVolunteer(volunteer);
+    setIsHistoryModalOpen(true);
   };
 
   // Handle form submit
@@ -488,6 +496,26 @@ export default function Volunteers() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
+                        {/* Botão Histórico - disponível para todos os usuários autenticados */}
+                        <button
+                          onClick={() => handleHistoryClick(volunteer)}
+                          className="p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                          title="Ver Histórico"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                        </button>
                         {/* Botão Gerar PDF - disponível para todos os usuários autenticados */}
                         <button
                           onClick={() => handleDownloadPDF(volunteer._id)}
@@ -617,6 +645,25 @@ export default function Volunteers() {
         variant="danger"
         isLoading={isSubmitting}
       />
+
+      {/* History Modal */}
+      <Modal
+        isOpen={isHistoryModalOpen}
+        onClose={() => {
+          setIsHistoryModalOpen(false);
+          setSelectedVolunteer(null);
+        }}
+        title={`Histórico - ${selectedVolunteer?.nomeCompleto || ""}`}
+        size="lg"
+      >
+        <VolunteerHistory
+          volunteerId={selectedVolunteer?._id}
+          onClose={() => {
+            setIsHistoryModalOpen(false);
+            setSelectedVolunteer(null);
+          }}
+        />
+      </Modal>
     </Layout>
   );
 }
