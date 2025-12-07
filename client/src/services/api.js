@@ -69,8 +69,16 @@ export const authService = {
 
 // Serviço de Voluntários
 export const volunteerService = {
-  // Lista todos os voluntários
-  getAll: () => request("/voluntarios"),
+  // Lista todos os voluntários com filtros opcionais
+  getAll: (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.nome) params.append('nome', filters.nome);
+    if (filters.cpf) params.append('cpf', filters.cpf);
+    if (filters.oficina) params.append('oficina', filters.oficina);
+    
+    const queryString = params.toString();
+    return request(`/voluntarios${queryString ? `?${queryString}` : ''}`);
+  },
 
   // Busca um voluntário por ID
   getById: (id) => request(`/voluntarios/${id}`),
@@ -94,6 +102,58 @@ export const volunteerService = {
     request(`/voluntarios/${id}`, {
       method: "DELETE",
     }),
+
+  // Gera e baixa PDF do voluntário
+  downloadPDF: async (id) => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+    
+    const response = await fetch(`${API_BASE_URL}/voluntarios/${id}/pdf`, {
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+
+    if (response.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem("ellp_user");
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+      throw new Error("Não autorizado");
+    }
+
+    if (!response.ok) {
+      const error = await response
+        .json()
+        .catch(() => ({ error: "Erro ao gerar PDF" }));
+      throw new Error(error.error || `Erro ${response.status}`);
+    }
+
+    // Obtém o blob do PDF
+    const blob = await response.blob();
+    
+    // Cria um link temporário para download
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    
+    // Extrai o nome do arquivo do header Content-Disposition ou usa um padrão
+    const contentDisposition = response.headers.get("Content-Disposition");
+    let filename = `termo-voluntariado-${id}.pdf`;
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+      if (filenameMatch) {
+        filename = filenameMatch[1];
+      }
+    }
+    
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
 };
 
 // Serviço de Oficinas
