@@ -5,6 +5,7 @@ import Toast from "./components/Toast";
 import PrivateRoute from "./components/PrivateRoute";
 import Login from "./pages/Login";
 import Volunteers from "./pages/Volunteers";
+import Workshops from "./pages/Workshops";
 import Unauthorized from "./pages/Unauthorized";
 
 function App() {
@@ -23,6 +24,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Volunteers />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/oficinas"
+            element={
+              <PrivateRoute>
+                <Workshops />
               </PrivateRoute>
             }
           />
