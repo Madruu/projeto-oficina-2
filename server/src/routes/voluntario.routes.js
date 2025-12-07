@@ -113,6 +113,50 @@ router.get(
 );
 
 /**
+ * @route   GET /voluntarios/:id/history
+ * @desc    Retorna o histórico completo de participação do voluntário em oficinas
+ * @access  Admin, Coordenador, Visitante
+ */
+router.get(
+  "/:id/history",
+  authenticate,
+  authorize(ROLES.ADMIN, ROLES.COORDENADOR, ROLES.VISITANTE),
+  async (req, res) => {
+    try {
+      const voluntario = await Voluntario.findById(req.params.id)
+        .populate('oficinaId', 'titulo descricao data local responsavel');
+      
+      if (!voluntario)
+        return res.status(404).json({ error: "Voluntário não encontrado" });
+
+      // Monta o histórico com informações das oficinas
+      const history = {
+        voluntario: {
+          id: voluntario._id,
+          nomeCompleto: voluntario.nomeCompleto,
+          dataEntrada: voluntario.dataEntrada,
+          dataSaida: voluntario.dataSaida,
+          ativo: voluntario.ativo,
+        },
+        oficinas: (voluntario.oficinaId || []).map((oficina) => ({
+          id: oficina._id,
+          titulo: oficina.titulo,
+          descricao: oficina.descricao,
+          data: oficina.data,
+          local: oficina.local,
+          responsavel: oficina.responsavel,
+        })),
+        totalOficinas: voluntario.oficinaId?.length || 0,
+      };
+
+      return res.json(history);
+    } catch (err) {
+      return res.status(400).json({ error: err.message || "ID inválido" });
+    }
+  }
+);
+
+/**
  * @route   GET /voluntarios/:id
  * @desc    Lista um voluntário por ID
  * @access  Admin, Coordenador, Visitante
