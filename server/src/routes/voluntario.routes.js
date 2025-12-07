@@ -246,7 +246,7 @@ router.post(
 
       // Verifica se já está associado
       if (voluntario.oficinaId.includes(oficinaId)) {
-        return res.status(409).json({ 
+        return res.status(200).json({ 
           error: "Este voluntário já está associado a esta oficina" 
         });
       }
