@@ -35,7 +35,10 @@ router.get(
   authorize(ROLES.ADMIN, ROLES.COORDENADOR, ROLES.VISITANTE),
   async (req, res) => {
     try {
-      const list = await Voluntario.find().sort({ createdAt: -1 });
+      const list = await Voluntario.find()
+        .populate("oficinaId", "titulo descricao data local responsavel")
+        .populate("associacoes.oficinaId", "titulo descricao data local responsavel")
+        .sort({ createdAt: -1 });
       return res.json(list);
     } catch (err) {
       return res.status(500).json({ error: err.message });
@@ -54,7 +57,9 @@ router.get(
   authorize(ROLES.ADMIN, ROLES.COORDENADOR, ROLES.VISITANTE),
   async (req, res) => {
     try {
-      const voluntario = await Voluntario.findById(req.params.id);
+      const voluntario = await Voluntario.findById(req.params.id)
+        .populate("oficinaId", "titulo descricao data local responsavel")
+        .populate("associacoes.oficinaId", "titulo descricao data local responsavel");
       if (!voluntario)
         return res.status(404).json({ error: "Voluntário não encontrado" });
       return res.json(voluntario);
@@ -117,15 +122,29 @@ router.post(
         voluntario.oficinaId = [];
       }
 
-      if (!voluntario.oficinaId.includes(oficinaId)) {
-        voluntario.oficinaId.push(oficinaId);
-        await voluntario.save();
+      // Verifica se já está associado
+      if (voluntario.oficinaId.includes(oficinaId)) {
+        return res.status(409).json({ 
+          error: "Este voluntário já está associado a esta oficina" 
+        });
       }
 
-      const voluntarioPopulado = await Voluntario.findById(id).populate(
-        "oficinaId",
-        "titulo descricao data local responsavel"
-      );
+      voluntario.oficinaId.push(oficinaId);
+      
+      // Adiciona ao histórico de associações
+      if (!Array.isArray(voluntario.associacoes)) {
+        voluntario.associacoes = [];
+      }
+      voluntario.associacoes.push({
+        oficinaId: oficinaId,
+        dataAssociacao: new Date()
+      });
+      
+      await voluntario.save();
+
+      const voluntarioPopulado = await Voluntario.findById(id)
+        .populate("oficinaId", "titulo descricao data local responsavel")
+        .populate("associacoes.oficinaId", "titulo descricao data local responsavel");
 
       return res.json({
         message: "Oficina associada com sucesso",

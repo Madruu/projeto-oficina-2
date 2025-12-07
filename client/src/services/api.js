@@ -89,6 +89,13 @@ export const volunteerService = {
       body: JSON.stringify(data),
     }),
 
+  // Associa uma oficina a um voluntário
+  assign: (id, workshopId) =>
+    request(`/voluntarios/${id}/assign`, {
+      method: "POST",
+      body: JSON.stringify({ oficinaId: workshopId }),
+    }),
+
   // Remove um voluntário
   delete: (id) =>
     request(`/voluntarios/${id}`, {
