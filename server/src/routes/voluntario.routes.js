@@ -272,7 +272,7 @@ router.post(
           .populate("associacoes.oficinaId", "titulo descricao data local responsavel");
 
         return res.json({
-          message: "Voluntário já está associado a esta oficina",
+          message: "Oficina associada com sucesso",
           voluntario: voluntarioPopulado,
         });
       }
