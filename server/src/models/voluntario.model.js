@@ -33,7 +33,11 @@ const VoluntarioSchema = new Schema({
     dataEntrada: { type: Date },
     dataSaida: { type: Date },
     ativo: { type: Boolean, default: true },
-    oficinaId: [{ type: Schema.Types.ObjectId, ref: 'Oficina', index: true }]
-}, { timestamps: true });
+    oficinaId: [{ type: Schema.Types.ObjectId, ref: 'Oficina', index: true }],
+    associacoes: [{
+        oficinaId: { type: Schema.Types.ObjectId, ref: 'Oficina' },
+        dataAssociacao: { type: Date, default: Date.now }
+    }]
+}, { timestamps: true, strictPopulate: false });
 
 export default mongoose.models.Voluntario || mongoose.model('Voluntario', VoluntarioSchema);

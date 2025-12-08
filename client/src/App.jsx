@@ -6,6 +6,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import Login from "./pages/Login";
 import Volunteers from "./pages/Volunteers";
 import Workshops from "./pages/Workshops";
+import VolunteerAssignment from "./pages/VolunteerAssignment";
 import Unauthorized from "./pages/Unauthorized";
 
 function App() {
@@ -32,6 +33,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Workshops />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/associações"
+            element={
+              <PrivateRoute>
+                <VolunteerAssignment />
               </PrivateRoute>
             }
           />
