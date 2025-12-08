@@ -128,7 +128,6 @@ export default function VolunteerAssignment() {
 
     try {
       let successCount = 0;
-      let duplicateCount = 0;
       const errors = [];
 
       // Assign each workshop individually
@@ -138,28 +137,17 @@ export default function VolunteerAssignment() {
           if (!selectedVolunteer.oficinaId?.includes(workshopId)) {
             await volunteerService.assign(selectedVolunteer._id, workshopId);
             successCount++;
-          } else {
-            duplicateCount++;
-          }
+          } 
         } catch (err) {
-          // Trata erro 409 (já associado) de forma mais elegante
-          if (err.message.includes("já está associado")) {
-            duplicateCount++;
-          } else {
-            errors.push(err.message);
-          }
+          errors.push(err.message);
         }
       }
 
       // Monta mensagem de resultado
       if (successCount > 0) {
         let message = `${successCount} oficina(s) associada(s) com sucesso!`;
-        if (duplicateCount > 0) {
-          message += ` ${duplicateCount} já estava(m) associada(s).`;
-        }
+        
         toast.success(message);
-      } else if (duplicateCount > 0) {
-        toast.warning(`Todas as ${duplicateCount} oficina(s) selecionada(s) já estavam associadas.`);
       }
 
       if (errors.length > 0) {

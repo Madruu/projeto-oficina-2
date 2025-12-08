@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import Voluntario from "../models/voluntario.model.js";
 import { authenticate, authorize, ROLES } from "../middleware/auth.middleware.js";
 import { generateVolunteerPDF } from "../services/pdf.service.js";
@@ -237,28 +238,51 @@ router.post(
       if (!oficinaId)
         return res.status(400).json({ error: "Informe o ID da oficina" });
 
+      // Validate ObjectID format
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "ID de voluntário inválido" });
+      }
+      if (!mongoose.Types.ObjectId.isValid(oficinaId)) {
+        return res.status(400).json({ error: "ID de oficina inválido" });
+      }
+
       const voluntario = await Voluntario.findById(id);
       if (!voluntario)
         return res.status(404).json({ error: "Voluntário não encontrado" });
-      if (!Array.isArray(voluntario.oficinaId)) {
-        voluntario.oficinaId = [];
-      }
 
-      // Verifica se já está associado
-      if (voluntario.oficinaId.includes(oficinaId)) {
-        return res.status(200).json({ 
-          error: "Este voluntário já está associado a esta oficina" 
-        });
+      // Always ensure arrays are initialized
+      if (!Array.isArray(voluntario.officinaId)) {
+        voluntario.officinaId = [];
       }
-
-      voluntario.oficinaId.push(oficinaId);
-      
-      // Adiciona ao histórico de associações
       if (!Array.isArray(voluntario.associacoes)) {
         voluntario.associacoes = [];
       }
+
+      // Standardize ID comparison by converting both to strings for comparison
+      const oficinaIdString = String(oficinaId);
+      const isAlreadyAssociated = voluntario.oficinaId.some(
+        id => String(id) === oficinaIdString
+      );
+
+      // Check if already associated
+      if (isAlreadyAssociated) {
+        // Don't add duplicate, but still return success with current state
+        const voluntarioPopulado = await Voluntario.findById(id)
+          .populate("oficinaId", "titulo descricao data local responsavel")
+          .populate("associacoes.oficinaId", "titulo descricao data local responsavel");
+
+        return res.json({
+          message: "Voluntário já está associado a esta oficina",
+          voluntario: voluntarioPopulado,
+        });
+      }
+
+      // Convert to ObjectID before pushing to arrays
+      const oficinaIdObjectId = mongoose.Types.ObjectId.createFromHexString(oficinaId);
+      
+      voluntario.oficinaId.push(oficinaIdObjectId);
       voluntario.associacoes.push({
-        oficinaId: oficinaId,
+        oficinaId: oficinaIdObjectId,
         dataAssociacao: new Date()
       });
       

@@ -476,6 +476,11 @@ describe("Voluntário CRUD", () => {
         .expect(200);
 
       expect(response.body.message).toBe("Oficina associada com sucesso");
+
+      // Verifica que não foi duplicada
+      const updatedVoluntario = await Voluntario.findById(voluntario._id);
+      expect(updatedVoluntario.oficinaId.length).toBe(1);
+      expect(updatedVoluntario.associacoes.length).toBe(1);
     });
 
     it("não deve associar oficina sem autenticação", async () => {
