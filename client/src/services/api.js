@@ -186,4 +186,9 @@ export const workshopService = {
     }),
 };
 
-export default { authService, volunteerService, workshopService };
+// Serviço de métricas / dashboard
+export const metricsService = {
+  getDashboard: () => request('/metrics/dashboard'),
+};
+
+export default { authService, volunteerService, workshopService, metricsService };

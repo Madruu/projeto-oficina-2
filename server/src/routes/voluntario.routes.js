@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Voluntario from "../models/voluntario.model.js";
 import { authenticate, authorize, ROLES } from "../middleware/auth.middleware.js";
 import { generateVolunteerPDF } from "../services/pdf.service.js";
+import TermoLog from "../models/termoLog.model.js";
 
 const router = express.Router();
 
@@ -92,6 +93,16 @@ router.get(
       const fileName = `termo-voluntariado-${voluntario.nomeCompleto.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}.pdf`;
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+
+      // Registra log do termo gerado (não bloqueante para o streaming)
+      (async () => {
+        try {
+          await TermoLog.create({ voluntarioId: voluntario._id, fileName, generatedAt: new Date() });
+        } catch (logErr) {
+          // Log de erro mas não impede o envio do PDF
+          console.error('Falha ao registrar log do termo:', logErr);
+        }
+      })();
 
       // Tratamento de erros no stream do PDF
       doc.on('error', (err) => {

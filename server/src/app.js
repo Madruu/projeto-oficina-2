@@ -5,6 +5,7 @@ import healthRoutes from "./routes/health.routes.js";
 import oficinaRoutes from "./routes/oficina.routes.js";
 import voluntarioRoutes from "./routes/voluntario.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import metricsRoutes from "./routes/metrics.routes.js";
 
 // Carrega variáveis de ambiente
 dotenv.config();
@@ -22,6 +23,7 @@ app.use("/auth", authRoutes);
 app.use("/health", healthRoutes);
 app.use("/oficinas", oficinaRoutes);
 app.use("/voluntarios", voluntarioRoutes);
+app.use("/metrics", metricsRoutes);
 
 // Middleware de tratamento de erros (deve ser o último)
 app.use((err, req, res, next) => {

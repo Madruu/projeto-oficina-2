@@ -8,6 +8,7 @@ import Volunteers from "./pages/Volunteers";
 import Workshops from "./pages/Workshops";
 import VolunteerAssignment from "./pages/VolunteerAssignment";
 import Unauthorized from "./pages/Unauthorized";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -25,6 +26,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Volunteers />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <Dashboard />
               </PrivateRoute>
             }
           />
