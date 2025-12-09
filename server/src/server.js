@@ -1,6 +1,6 @@
 import app from "./app.js";
 import connectDB from "./config/db.js";
-import seedDefaultAdmin from "./config/seed.js";
+import seedDefaultAdmin, { seedSampleData } from "./config/seed.js";
 
 const PORT = process.env.PORT || 8000;
 
@@ -12,6 +12,9 @@ const startServer = async () => {
 
     // Cria usuário admin padrão se não existir
     await seedDefaultAdmin();
+
+    // Cria dados de exemplo (oficinas, voluntários e associações)
+    await seedSampleData();
 
     // Inicia o servidor
     app.listen(PORT, () => {

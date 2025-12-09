@@ -11,6 +11,8 @@ export default {
     "!src/**/*.test.js",
     "!src/**/*.spec.js",
     "!src/server.js",
+    "!src/config/**",
+    "!src/services/**",
   ],
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov", "html"],
