@@ -22,6 +22,7 @@ export default function Volunteers() {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [downloadingCSV, setDownloadingCSV] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(null); // ID do voluntário que está gerando PDF
 
   const toast = useToast();
@@ -323,28 +324,56 @@ export default function Volunteers() {
 
         {/* Add button row */}
         <div className="flex justify-end mt-4">
-
-          {canEdit() && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={handleCreate}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-semibold rounded-lg hover:from-cyan-600 hover:to-teal-600 transition-all shadow-lg shadow-cyan-500/25"
+              onClick={async () => {
+                try {
+                  setDownloadingCSV(true);
+                  await volunteerService.exportAll();
+                  toast.success('CSV exportado com sucesso!');
+                } catch (err) {
+                  toast.error('Erro ao exportar CSV: ' + err.message);
+                } finally {
+                  setDownloadingCSV(false);
+                }
+              }}
+              className="flex items-center gap-2 px-3 py-2.5 bg-slate-700/50 text-slate-100 rounded-lg hover:bg-slate-700/60 transition"
+              title="Exportar CSV"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              Novo Voluntário
+              {downloadingCSV ? (
+                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              )}
+              <span className="text-sm">Exportar CSV</span>
             </button>
-          )}
+
+            {canEdit() && (
+              <button
+                onClick={handleCreate}
+                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-semibold rounded-lg hover:from-cyan-600 hover:to-teal-600 transition-all shadow-lg shadow-cyan-500/25"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Novo Voluntário
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

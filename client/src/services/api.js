@@ -164,6 +164,97 @@ export const volunteerService = {
     link.remove();
     window.URL.revokeObjectURL(url);
   },
+  // Exporta CSV com a lista completa de voluntários
+  exportAll: async () => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+    const response = await fetch(`${API_BASE_URL}/voluntarios/export`, {
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+
+    if (response.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem("ellp_user");
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+      throw new Error("Não autorizado");
+    }
+
+    if (!response.ok) {
+      const error = await response
+        .json()
+        .catch(() => ({ error: "Erro ao exportar CSV" }));
+      throw new Error(error.error || `Erro ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+
+    const contentDisposition = response.headers.get("Content-Disposition");
+    let filename = `voluntarios-${Date.now()}.csv`;
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?(.+?)"?/);
+      if (filenameMatch) filename = filenameMatch[1];
+    }
+
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
+  // Exporta CSV do histórico de um voluntário
+  exportHistory: async (id) => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+    const response = await fetch(`${API_BASE_URL}/voluntarios/${id}/history/export`, {
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+
+    if (response.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem("ellp_user");
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+      throw new Error("Não autorizado");
+    }
+
+    if (!response.ok) {
+      const error = await response
+        .json()
+        .catch(() => ({ error: "Erro ao exportar CSV" }));
+      throw new Error(error.error || `Erro ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+
+    const contentDisposition = response.headers.get("Content-Disposition");
+    let filename = `voluntario-${id}-history-${Date.now()}.csv`;
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?(.+?)"?/);
+      if (filenameMatch) filename = filenameMatch[1];
+    }
+
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
 };
 
 // Serviço de Oficinas

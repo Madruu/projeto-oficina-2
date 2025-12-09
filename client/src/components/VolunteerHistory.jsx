@@ -7,6 +7,7 @@ export default function VolunteerHistory({ volunteerId, onClose }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const toast = useToast();
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -142,13 +143,31 @@ export default function VolunteerHistory({ volunteerId, onClose }) {
       <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
         <div className="p-6 border-b border-slate-700">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-slate-100">
-              Histórico de Participação em Oficinas
-            </h3>
-            <span className="px-3 py-1 bg-cyan-500/10 text-cyan-400 rounded-full text-sm font-medium border border-cyan-500/20">
-              {history.totalOficinas} {history.totalOficinas === 1 ? "oficina" : "oficinas"}
-            </span>
-          </div>
+              <h3 className="text-lg font-semibold text-slate-100">
+                Histórico de Participação em Oficinas
+              </h3>
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 bg-cyan-500/10 text-cyan-400 rounded-full text-sm font-medium border border-cyan-500/20">
+                  {history.totalOficinas} {history.totalOficinas === 1 ? "oficina" : "oficinas"}
+                </span>
+                <button
+                  onClick={async () => {
+                    try {
+                      setExporting(true);
+                      await volunteerService.exportHistory(volunteerId);
+                      toast.success('CSV do histórico exportado com sucesso!');
+                    } catch (err) {
+                      toast.error('Erro ao exportar histórico: ' + err.message);
+                    } finally {
+                      setExporting(false);
+                    }
+                  }}
+                  className="px-3 py-1 bg-slate-700/50 text-slate-100 rounded hover:bg-slate-700/60 text-sm"
+                >
+                  {exporting ? 'Exportando...' : 'Exportar CSV'}
+                </button>
+              </div>
+            </div>
         </div>
 
         {history.oficinas.length === 0 ? (

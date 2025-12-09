@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import Voluntario from "../models/voluntario.model.js";
 import { authenticate, authorize, ROLES } from "../middleware/auth.middleware.js";
 import { generateVolunteerPDF } from "../services/pdf.service.js";
+import TermoLog from "../models/termoLog.model.js";
+import { generateVolunteersCSV, generateVolunteerHistoryCSV } from "../services/export.service.js";
 
 const router = express.Router();
 
@@ -92,6 +94,15 @@ router.get(
       const fileName = `termo-voluntariado-${voluntario.nomeCompleto.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}.pdf`;
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+
+      // Registra log do termo gerado (não bloqueante para o streaming)
+      (async () => {
+        try {
+          await TermoLog.create({ voluntarioId: voluntario._id, fileName, generatedAt: new Date() });
+        } catch (logErr) {
+          console.error('Falha ao registrar log do termo:', logErr);
+        }
+      })();
 
       // Tratamento de erros no stream do PDF
       doc.on('error', (err) => {
@@ -319,6 +330,53 @@ router.delete(
       return res.json({ message: "Voluntário removido" });
     } catch (err) {
       return res.status(400).json({ error: "ID inválido" });
+    }
+  }
+);
+
+/**
+ * @route   GET /voluntarios/export
+ * @desc    Exporta CSV com a lista completa de voluntários
+ * @access  Admin, Coordenador
+ */
+router.get(
+  "/export",
+  authenticate,
+  authorize(ROLES.ADMIN, ROLES.COORDENADOR),
+  async (req, res) => {
+    try {
+      const csv = await generateVolunteersCSV();
+      const fileName = `voluntarios-${Date.now()}.csv`;
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      return res.send(csv);
+    } catch (err) {
+      console.error('Erro ao exportar voluntários:', err);
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+/**
+ * @route   GET /voluntarios/:id/history/export
+ * @desc    Exporta CSV com o histórico detalhado de um voluntário
+ * @access  Admin, Coordenador
+ */
+router.get(
+  ":id/history/export",
+  authenticate,
+  authorize(ROLES.ADMIN, ROLES.COORDENADOR),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const csv = await generateVolunteerHistoryCSV(id);
+      const fileName = `voluntario-${id}-history-${Date.now()}.csv`;
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      return res.send(csv);
+    } catch (err) {
+      console.error('Erro ao exportar histórico:', err);
+      return res.status(500).json({ error: err.message });
     }
   }
 );
