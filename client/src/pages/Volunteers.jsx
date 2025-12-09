@@ -22,6 +22,7 @@ export default function Volunteers() {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [downloadingCSV, setDownloadingCSV] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(null); // ID do voluntário que está gerando PDF
 
   const toast = useToast();
@@ -240,7 +241,7 @@ export default function Volunteers() {
             {/* Oficina filter */}
             <div className="relative flex-1">
               <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -255,7 +256,7 @@ export default function Volunteers() {
               <select
                 value={oficinaFilter}
                 onChange={(e) => setOficinaFilter(e.target.value)}
-                className="pl-10 pr-4 py-2.5 w-full bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition cursor-pointer appearance-none"
+                className="pl-10 pr-10 py-2.5 w-full bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition cursor-pointer appearance-none"
               >
                 <option value="">Todas as oficinas</option>
                 {workshops.map((workshop) => (
@@ -264,18 +265,46 @@ export default function Volunteers() {
                   </option>
                 ))}
               </select>
+              <svg
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
             </div>
 
             {/* Status filter */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition cursor-pointer"
-            >
-              <option value="all">Todos</option>
-              <option value="active">Ativos</option>
-              <option value="inactive">Inativos</option>
-            </select>
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="pl-4 pr-10 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition cursor-pointer appearance-none"
+              >
+                <option value="all">Todos</option>
+                <option value="active">Ativos</option>
+                <option value="inactive">Inativos</option>
+              </select>
+              <svg
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
           </div>
 
           {/* Clear filters button */}
@@ -295,28 +324,56 @@ export default function Volunteers() {
 
         {/* Add button row */}
         <div className="flex justify-end mt-4">
-
-          {canEdit() && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={handleCreate}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-semibold rounded-lg hover:from-cyan-600 hover:to-teal-600 transition-all shadow-lg shadow-cyan-500/25"
+              onClick={async () => {
+                try {
+                  setDownloadingCSV(true);
+                  await volunteerService.exportAll();
+                  toast.success('CSV exportado com sucesso!');
+                } catch (err) {
+                  toast.error('Erro ao exportar CSV: ' + err.message);
+                } finally {
+                  setDownloadingCSV(false);
+                }
+              }}
+              className="flex items-center gap-2 px-3 py-2.5 bg-slate-700/50 text-slate-100 rounded-lg hover:bg-slate-700/60 transition"
+              title="Exportar CSV"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              Novo Voluntário
+              {downloadingCSV ? (
+                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              )}
+              <span className="text-sm">Exportar CSV</span>
             </button>
-          )}
+
+            {canEdit() && (
+              <button
+                onClick={handleCreate}
+                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-semibold rounded-lg hover:from-cyan-600 hover:to-teal-600 transition-all shadow-lg shadow-cyan-500/25"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Novo Voluntário
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
